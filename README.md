@@ -9,7 +9,7 @@ This template is designed for jailed iOS devices
 ### Usage
 
 #### TITANOX
-Refer to [Titanox]([https://theos.dev/docs/installation](https://github.com/Ragekill3377/Titanox) 
+Refer to [Titanox]([https://theos.dev/docs/installation](https://github.com/Ragekill3377/Titanox))
 
 #### Compilation
 
