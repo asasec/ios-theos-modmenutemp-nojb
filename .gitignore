@@ -1,0 +1,5 @@
+*.dylib
+*.o
+.theos/
+.DS_Store
+*.zip
