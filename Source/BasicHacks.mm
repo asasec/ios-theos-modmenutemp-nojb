@@ -24,6 +24,7 @@ uintptr_t GetImageSlideAddress(const char *imageName) {
     for (uint32_t i = 0; i < imageCount; i++) {
         const char *name = _dyld_get_image_name(i);
         if (name && strstr(name, imageName)) {
+            // Doğru bellek header adresini döndürüyoruz
             return (uintptr_t)_dyld_get_image_header(i);
         }
     }
@@ -34,13 +35,16 @@ void* BasicHacks::HacksThread(void* arg)
 {
     ShowAlertNotification(@"HacksThread Başlatıldı!");
 
+    // UnityFramework belleğe yüklenene kadar güvenle bekle
     uintptr_t baseAddr = 0;
     while (baseAddr == 0 && KTempVars.running) {
         baseAddr = GetImageSlideAddress("UnityFramework");
         if (baseAddr == 0) {
-            usleep(500000);
+            usleep(500000); // 0.5 saniye bekle
         }
     }
+
+    ShowAlertNotification(@"UnityFramework Adresi Bulundu!");
 
     uint8_t patchBytes[] = {0xE0, 0x47, 0x88, 0x52, 0xE0, 0x01, 0xA0, 0x72, 0xC0, 0x03, 0x5F, 0xD6};
     void* targetAddress = (void*)(baseAddr + 0x210EC54);
