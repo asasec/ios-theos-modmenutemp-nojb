@@ -78,6 +78,7 @@ struct GlobalVariables
     bool ESPEnabled = false;
     bool running = false;
     bool console = false;
+    bool AimHack = false;
 
 };
 
