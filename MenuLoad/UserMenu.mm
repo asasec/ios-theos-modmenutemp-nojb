@@ -86,7 +86,8 @@ void UserMenu::ConsoleMenu()
         ImGui::Begin("KomaruConsole", nullptr, WFlags);
 
         ImGuiWindow* ConsoleWindow = ImGui::GetCurrentWindow();
-        KTempVars.ConsoleSize   = ConsoleWindow$->Size;
+        // DÜZELTİLDİ: ConsoleWindow$ -> ConsoleWindow oldu
+        KTempVars.ConsoleSize   = ConsoleWindow->Size;
         KTempVars.ConsoleOrigin = ConsoleWindow->Pos;
 
         ShowOutputTextbox();
