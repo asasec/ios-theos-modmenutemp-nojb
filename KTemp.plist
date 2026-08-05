@@ -1,1 +1,1 @@
-{ Filter = { Bundles = ( "com.apple.KTemp" ); }; }
+{ Filter = { Bundles = ( "com.Earthkwak.Platformer" ); }; }
