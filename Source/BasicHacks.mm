@@ -1,7 +1,7 @@
 #include "../MenuLoad/Includes.h"
+#include "../utils/libtitanox/mempatch/THPatchMem.h"
 #import <UIKit/UIKit.h>
 
-// Ekranda kısa süreliğine bildirim göstermek için yardımcı fonksiyon
 static void ShowAlertNotification(NSString *message) {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIWindow *window = [UIApplication sharedApplication].windows.firstObject;
@@ -12,7 +12,6 @@ static void ShowAlertNotification(NSString *message) {
                                                                  preferredStyle:UIAlertControllerStyleAlert];
         [rootVC presentViewController:alert animated:YES completion:nil];
         
-        // 1.5 saniye sonra bildirimi otomatik kapat
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [alert dismissViewControllerAnimated:YES completion:nil];
         });
@@ -24,8 +23,12 @@ void* BasicHacks::HacksThread(void* arg)
     bool lastState = false;
     
     try {
-        // UnityFramework üzerinden offset ve hex patch tanımı
-        MemoryPatch patch = MemoryPatch::createWithHex("UnityFramework", 0x210EC54, "E0 47 88 52 E0 01 A0 72 C0 03 5F D6");
+        // Hex değerlerini byte dizisine çeviriyoruz
+        uint8_t patchBytes[] = {0xE0, 0x47, 0x88, 0x52, 0xE0, 0x01, 0xA0, 0x72, 0xC0, 0x03, 0x5F, 0xD6};
+        
+        // UnityFramework temel adresini bulmak veya offset eklemek için mach-o yapıları kullanılır
+        // Doğrudan adres üzerinden patch atmak için kütüphane adresini alıyoruz:
+        void* targetAddress = (void*)(stringGetAddress("UnityFramework") + 0x210EC54);
 
         while(KTempVars.running)
         {   
@@ -33,14 +36,11 @@ void* BasicHacks::HacksThread(void* arg)
             {
                 if (!lastState) 
                 {
-                    if (patch.isValid()) 
-                    {
-                        patch.modify();
+                    bool success = THPatchMem::PatchMemory(targetAddress, patchBytes, sizeof(patchBytes));
+                    if (success) {
                         ShowAlertNotification(@"Streamer Mode: AÇILDI (Patch Başarılı)");
-                    } 
-                    else 
-                    {
-                        ShowAlertNotification(@"Hata: Patch Geçersiz (Invalid)!");
+                    } else {
+                        ShowAlertNotification(@"Hata: Patch Başarısız!");
                     }
                     lastState = true;
                 }
@@ -49,16 +49,13 @@ void* BasicHacks::HacksThread(void* arg)
             {
                 if (lastState) 
                 {
-                    if (patch.isValid()) 
-                    {
-                        patch.restore();
-                        ShowAlertNotification(@"Streamer Mode: KAPANDI (Restore)");
-                    }
+                    // Not: Eğer orijinal baytları saklamadıysan kapatma (restore) işleminde orijinal hex'leri bilmen gerekir.
                     lastState = false;
+                    ShowAlertNotification(@"Streamer Mode: KAPANDI");
                 }
             }
 
-            usleep(100000); // 100ms
+            usleep(100000);
         }
     } 
     catch (...) {
