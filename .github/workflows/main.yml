@@ -28,7 +28,7 @@ jobs:
         rm -rf ~/theos/sdks
         git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
-    - name: Find Makefile and Build
+        - name: Find Makefile and Build
       run: |
         export THEOS=~/theos
         
@@ -37,7 +37,15 @@ jobs:
         if [ -n "$MAKE_DIR" ]; then
           cd "$MAKE_DIR"
           
-          LATEST_SDK=$(ls ~/theos/sdks | grep iPhoneOS | head -n 1 | sed 's/iPhoneOS//' | sed 's/\.sdk//')
+          # Belirli bir güncel SDK sürümünü zorunlu kılmak için (Örn: 14.5 veya 15.5)
+          # Veya listeden 10.x gibi eski sürümleri eleyerek en yüksek sürümü seçmek için:
+          LATEST_SDK=$(ls ~/theos/sdks | grep iPhoneOS | grep -v "10\." | sort -V | tail -n 1 | sed 's/iPhoneOS//' | sed 's/\.sdk//')
+          
+          # Eğer yukarıdaki filtreye uygun SDK bulunamazsa güvenli bir varsayılan atayın:
+          if [ -z "$LATEST_SDK" ]; then
+            LATEST_SDK="14.5"
+          fi
+
           echo "Kullanılan SDK Sürümü: $LATEST_SDK"
           
           make package FINALPACKAGE=1 TARGET=iphone:clang:$LATEST_SDK:14.0 || make FINALPACKAGE=1 TARGET=iphone:clang:$LATEST_SDK:14.0 || make
