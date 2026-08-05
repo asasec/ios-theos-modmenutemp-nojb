@@ -34,9 +34,6 @@ void* BasicHacks::HacksThread(void* arg)
 {
     ShowAlertNotification(@"HacksThread Başlatıldı!");
 
-    bool lastState = false;
-
-    // UnityFramework adresini ve patch byte'larını hazırlıyoruz
     uintptr_t baseAddr = 0;
     while (baseAddr == 0 && KTempVars.running) {
         baseAddr = GetImageSlideAddress("UnityFramework");
@@ -48,13 +45,15 @@ void* BasicHacks::HacksThread(void* arg)
     uint8_t patchBytes[] = {0xE0, 0x47, 0x88, 0x52, 0xE0, 0x01, 0xA0, 0x72, 0xC0, 0x03, 0x5F, 0xD6};
     void* targetAddress = (void*)(baseAddr + 0x210EC54);
 
+    bool lastState = false;
+
     while(KTempVars.running)
     {   
-        if (KTempVars.StreamerMode) 
+        if (KTempVars.AimHack) 
         {
             if (!lastState) 
             {
-                ShowAlertNotification(@"Streamer Mode Açıldı Tetiklendi!");
+                ShowAlertNotification(@"Aim Hack Açıldı Tetiklendi!");
                 
                 bool success = THPatchMem::PatchMemory(targetAddress, patchBytes, sizeof(patchBytes));
                 if (success) {
@@ -70,7 +69,7 @@ void* BasicHacks::HacksThread(void* arg)
         {
             if (lastState) 
             {
-                ShowAlertNotification(@"Streamer Mode Kapandı!");
+                ShowAlertNotification(@"Aim Hack Kapandı!");
                 lastState = false;
             }
         }
