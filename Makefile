@@ -11,12 +11,15 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = KTemp
 
- $(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation Security QuartzCore CoreGraphics CoreText AVFoundation Accelerate GLKit SystemConfiguration GameController
+$(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation Security QuartzCore CoreGraphics CoreText AVFoundation Accelerate GLKit SystemConfiguration GameController
 
- $(TWEAK_NAME)_CFLAGS = -fobjc-arc -Wall -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-value -Wno-unused-function
- $(TWEAK_NAME)_CCFLAGS = -std=c++17 -fno-rtti -DNDEBUG -Wall -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-value -Wno-unused-function -Wno-writable-strings
+ADDITIONAL_CFLAGS += -Wno-error=nontrivial-memcall -Wno-nontrivial-memcall
+ADDITIONAL_CPPFLAGS += -Wno-error=nontrivial-memcall -Wno-nontrivial-memcall
 
- $(TWEAK_NAME)_FILES = MenuLoad/ImGuiDrawView.xm \
+$(TWEAK_NAME)_CFLAGS = -fobjc-arc -Wall -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-value -Wno-unused-function
+$(TWEAK_NAME)_CCFLAGS = -std=c++17 -fno-rtti -DNDEBUG -Wall -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-value -Wno-unused-function -Wno-writable-strings
+
+$(TWEAK_NAME)_FILES = MenuLoad/ImGuiDrawView.xm \
                       $(wildcard MenuLoad/*.mm) \
                       $(wildcard Source/*.mm) \
                       $(wildcard ImGui/*.mm) \
