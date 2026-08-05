@@ -1,4 +1,4 @@
-name: Build Mod Menu
+Name: Build Mod Menu
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
         rm -rf ~/theos/sdks
         git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
-        - name: Find Makefile and Build
+    - name: Find Makefile and Build
       run: |
         export THEOS=~/theos
         
@@ -37,11 +37,10 @@ jobs:
         if [ -n "$MAKE_DIR" ]; then
           cd "$MAKE_DIR"
           
-          # Belirli bir güncel SDK sürümünü zorunlu kılmak için (Örn: 14.5 veya 15.5)
-          # Veya listeden 10.x gibi eski sürümleri eleyerek en yüksek sürümü seçmek için:
+          # 10.x gibi eski SDK'ları eleyerek en güncel sürümü seç
           LATEST_SDK=$(ls ~/theos/sdks | grep iPhoneOS | grep -v "10\." | sort -V | tail -n 1 | sed 's/iPhoneOS//' | sed 's/\.sdk//')
           
-          # Eğer yukarıdaki filtreye uygun SDK bulunamazsa güvenli bir varsayılan atayın:
+          # Eğer uygun SDK bulunamazsa güvenli bir varsayılan ata
           if [ -z "$LATEST_SDK" ]; then
             LATEST_SDK="14.5"
           fi
