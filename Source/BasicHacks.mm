@@ -19,34 +19,12 @@ static void ShowAlertNotification(NSString *message) {
     });
 }
 
-uintptr_t GetImageSlideAddress(const char *imageName) {
-    uint32_t imageCount = _dyld_image_count();
-    for (uint32_t i = 0; i < imageCount; i++) {
-        const char *name = _dyld_get_image_name(i);
-        if (name && strstr(name, imageName)) {
-            return (uintptr_t)_dyld_get_image_header(i);
-        }
-    }
-    return 0;
-}
-
 void* BasicHacks::HacksThread(void* arg)
 {
-    // 1. Adım: UnityFramework'ün belleğe yüklenmesini güvenli bir şekilde bekle
-    uintptr_t baseAddr = 0;
-    while (baseAddr == 0 && KTempVars.running) {
-        baseAddr = GetImageSlideAddress("UnityFramework");
-        if (baseAddr == 0) {
-            usleep(500000); // 0.5 saniye bekle ve tekrar dene
-        }
-    }
-
-    // UnityFramework başarıyla bulunduysa bilgi ver
-    ShowAlertNotification(@"UnityFramework Bulundu!");
+    // Thread'in çalıştığını anlamak için direkt başa alert koyuyoruz
+    ShowAlertNotification(@"HacksThread Başlatıldı!");
 
     bool lastState = false;
-    uint8_t patchBytes[] = {0xE0, 0x47, 0x88, 0x52, 0xE0, 0x01, 0xA0, 0x72, 0xC0, 0x03, 0x5F, 0xD6};
-    void* targetAddress = (void*)(baseAddr + 0x210EC54);
 
     while(KTempVars.running)
     {   
@@ -54,12 +32,7 @@ void* BasicHacks::HacksThread(void* arg)
         {
             if (!lastState) 
             {
-                bool success = THPatchMem::PatchMemory(targetAddress, patchBytes, sizeof(patchBytes));
-                if (success) {
-                    ShowAlertNotification(@"Streamer Mode: AÇILDI (Patch Başarılı)");
-                } else {
-                    ShowAlertNotification(@"Hata: Patch Başarısız!");
-                }
+                ShowAlertNotification(@"Streamer Mode Açıldı Tetiklendi!");
                 lastState = true;
             }
         } 
@@ -67,8 +40,8 @@ void* BasicHacks::HacksThread(void* arg)
         {
             if (lastState) 
             {
+                ShowAlertNotification(@"Streamer Mode Kapandı!");
                 lastState = false;
-                ShowAlertNotification(@"Streamer Mode: KAPANDI");
             }
         }
 
