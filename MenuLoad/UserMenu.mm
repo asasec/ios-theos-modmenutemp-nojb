@@ -21,25 +21,11 @@ void UserMenu::DrawMenu()
         
         if (KTempVars.running)
         {
-            /*
             if(ImGui::CollapsingHeader("Aim")) 
             {
-
+                ImGui::Checkbox("Aim Hack", &KTempVars.AimHack);
             }   
 
-            if(ImGui::CollapsingHeader("ESP")) 
-            {
-
-            }   
-            if(ImGui::CollapsingHeader("Misc")) 
-            {
-
-            }
-            if(ImGui::CollapsingHeader("Customize")) 
-            {
-
-            }
-            */
             if(ImGui::CollapsingHeader("Development")) 
             {
                 ImGui::Checkbox("DBG Console", &KTempVars.console);
@@ -48,8 +34,6 @@ void UserMenu::DrawMenu()
 
         ImGui::Spacing();
         ImGui::Checkbox("Move Menu", &KTempVars.MoveMenu);
-        ImGui::SameLine();
-        ImGui::Checkbox("Streamer Mode", &KTempVars.StreamerMode);
         
         ImGui::End();
     }
@@ -102,7 +86,7 @@ void UserMenu::ConsoleMenu()
         ImGui::Begin("KomaruConsole", nullptr, WFlags);
 
         ImGuiWindow* ConsoleWindow = ImGui::GetCurrentWindow();
-        KTempVars.ConsoleSize   = ConsoleWindow->Size;
+        KTempVars.ConsoleSize   = ConsoleWindow$->Size;
         KTempVars.ConsoleOrigin = ConsoleWindow->Pos;
 
         ShowOutputTextbox();
