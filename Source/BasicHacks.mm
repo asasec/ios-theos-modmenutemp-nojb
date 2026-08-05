@@ -1,6 +1,7 @@
 #include "../MenuLoad/Includes.h"
 #include "../utils/libtitanox/mempatch/THPatchMem.h"
 #import <UIKit/UIKit.h>
+#import <mach-o/dyld.h>
 
 static void ShowAlertNotification(NSString *message) {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -18,17 +19,30 @@ static void ShowAlertNotification(NSString *message) {
     });
 }
 
+// Belirli bir kütüphanenin (örneğin UnityFramework) bellekteki başlangıç adresini (slide dahil) bulan yardımcı fonksiyon
+uintptr_t GetImageSlideAddress(const char *imageName) {
+    uint32_t imageCount = _dyld_image_count();
+    for (uint32_t i = 0; i < imageCount; i++) {
+        const char *name = _dyld_get_image_name(i);
+        if (name && strstr(name, imageName)) {
+            return _dyld_get_image_vmaddr_slide(i) + 
+                   // Alternatif olarak slide ile beraber header adresini döndürüyoruz
+                   (uintptr_t)_dyld_get_image_header(i);
+        }
+    }
+    return 0;
+}
+
 void* BasicHacks::HacksThread(void* arg)
 {
     bool lastState = false;
     
     try {
-        // Hex değerlerini byte dizisine çeviriyoruz
         uint8_t patchBytes[] = {0xE0, 0x47, 0x88, 0x52, 0xE0, 0x01, 0xA0, 0x72, 0xC0, 0x03, 0x5F, 0xD6};
         
-        // UnityFramework temel adresini bulmak veya offset eklemek için mach-o yapıları kullanılır
-        // Doğrudan adres üzerinden patch atmak için kütüphane adresini alıyoruz:
-        void* targetAddress = (void*)(stringGetAddress("UnityFramework") + 0x210EC54);
+        // UnityFramework adresini güvenli bir şekilde hesaplıyoruz
+        uintptr_t baseAddr = GetImageSlideAddress("UnityFramework");
+        void* targetAddress = (void*)(baseAddr + 0x210EC54);
 
         while(KTempVars.running)
         {   
@@ -36,11 +50,15 @@ void* BasicHacks::HacksThread(void* arg)
             {
                 if (!lastState) 
                 {
-                    bool success = THPatchMem::PatchMemory(targetAddress, patchBytes, sizeof(patchBytes));
-                    if (success) {
-                        ShowAlertNotification(@"Streamer Mode: AÇILDI (Patch Başarılı)");
+                    if (baseAddr == 0) {
+                        ShowAlertNotification(@"Hata: UnityFramework Bulunamadı!");
                     } else {
-                        ShowAlertNotification(@"Hata: Patch Başarısız!");
+                        bool success = THPatchMem::PatchMemory(targetAddress, patchBytes, sizeof(patchBytes));
+                        if (success) {
+                            ShowAlertNotification(@"Streamer Mode: AÇILDI (Patch Başarılı)");
+                        } else {
+                            ShowAlertNotification(@"Hata: Patch Başarısız!");
+                        }
                     }
                     lastState = true;
                 }
@@ -49,7 +67,6 @@ void* BasicHacks::HacksThread(void* arg)
             {
                 if (lastState) 
                 {
-                    // Not: Eğer orijinal baytları saklamadıysan kapatma (restore) işleminde orijinal hex'leri bilmen gerekir.
                     lastState = false;
                     ShowAlertNotification(@"Streamer Mode: KAPANDI");
                 }
