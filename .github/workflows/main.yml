@@ -1,4 +1,4 @@
-Name: Build Mod Menu
+name: Build Mod Menu
 
 on:
   push:
